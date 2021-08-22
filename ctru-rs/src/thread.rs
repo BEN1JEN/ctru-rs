@@ -886,7 +886,6 @@ fn _assert_sync_and_send() {
 }
 
 mod imp {
-    use std::boxed::FnBox;
     use std::cmp;
     use std::io;
     use std::mem;
@@ -912,7 +911,7 @@ mod imp {
             stack: usize,
             priority: i32,
             affinity: i32,
-            p: Box<FnBox() + 'a>,
+            p: Box<FnOnce() + 'a>,
         ) -> io::Result<Thread> {
             let p = Box::new(p);
             let stack_size = cmp::max(stack, DEFAULT_MIN_STACK_SIZE);
@@ -961,7 +960,7 @@ mod imp {
         }
 
         unsafe fn _start_thread(main: *mut u8) {
-            Box::from_raw(main as *mut Box<FnBox()>)()
+            Box::from_raw(main as *mut Box<FnOnce()>)()
         }
 
         pub fn yield_now() {

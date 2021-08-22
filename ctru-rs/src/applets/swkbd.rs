@@ -112,7 +112,7 @@ impl Swkbd {
         // libctru does, however, seem to ensure that the buffer will always contain a properly
         // terminated UTF-8 sequence even if the input has to be truncated, so these operations
         // should be safe.
-        let len = unsafe { libc::strlen(tmp.as_ptr()) };
+        let len = unsafe { libc::strlen(tmp.as_ptr() as *const i8) };
         let utf8 = unsafe { str::from_utf8_unchecked(&tmp[..len]) };
 
         // Copy the input into the user's `String`
@@ -127,7 +127,7 @@ impl Swkbd {
     /// the output will be truncated but should still be well-formed UTF-8
     pub fn get_bytes(&mut self, buf: &mut [u8]) -> Result<Button, Error> {
         unsafe {
-            match swkbdInputText(self.state.as_mut(), buf.as_mut_ptr(), buf.len()) {
+            match swkbdInputText(self.state.as_mut(), buf.as_mut_ptr() as *mut i8, buf.len()) {
                 libctru::SWKBD_BUTTON_NONE => Err(self.parse_swkbd_error()),
                 libctru::SWKBD_BUTTON_LEFT => Ok(Button::Left),
                 libctru::SWKBD_BUTTON_MIDDLE => Ok(Button::Middle),
@@ -162,7 +162,7 @@ impl Swkbd {
     pub fn set_hint_text(&mut self, text: &str) {
         unsafe {
             let nul_terminated: String = text.chars().chain(once('\0')).collect();
-            swkbdSetHintText(self.state.as_mut(), nul_terminated.as_ptr());
+            swkbdSetHintText(self.state.as_mut(), nul_terminated.as_ptr() as *const i8);
         }
     }
 
@@ -175,7 +175,7 @@ impl Swkbd {
     pub fn configure_button(&mut self, button: Button, text: &str, submit: bool) {
         unsafe {
             let nul_terminated: String = text.chars().chain(once('\0')).collect();
-            swkbdSetButton(self.state.as_mut(), button as u32, nul_terminated.as_ptr(), submit);
+            swkbdSetButton(self.state.as_mut(), button as u32, nul_terminated.as_ptr() as *const i8, submit);
         }
     }
 

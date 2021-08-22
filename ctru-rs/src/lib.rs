@@ -1,7 +1,7 @@
 #![crate_type = "rlib"]
 #![crate_name = "ctru"]
 
-#![feature(fnbox)]
+// #![feature(fnbox)]
 
 #[macro_use]
 extern crate bitflags;
